@@ -1,0 +1,164 @@
+# ===== NODE.JS =====
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# ===== RUNTIME DATA =====
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# ===== COVERAGE DIRECTORY =====
+lib-cov
+coverage/
+*.lcov
+.nyc_output
+
+# ===== BUILD DIRECTORIES =====
+dist/
+build/
+.next/
+.nuxt/
+.cache/
+.parcel-cache/
+
+# ===== ENVIRONMENT VARIABLES =====
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# ===== LOGS =====
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ===== DEPENDENCY DIRECTORIES =====
+jspm_packages/
+
+# ===== TYPESCRIPT =====
+*.tsbuildinfo
+
+# ===== OPTIONAL NPM CACHE DIRECTORY =====
+.npm
+
+# ===== OPTIONAL ESLINT CACHE =====
+.eslintcache
+
+# ===== OPTIONAL STYLELINT CACHE =====
+.stylelintcache
+
+# ===== MICROBUNDLE CACHE =====
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+
+# ===== OPTIONAL REPL HISTORY =====
+.node_repl_history
+
+# ===== OUTPUT OF 'NPM PACK' =====
+*.tgz
+
+# ===== YARN INTEGRITY FILE =====
+.yarn-integrity
+
+# ===== PARCEL-BUNDLER CACHE =====
+.cache
+.parcel-cache
+
+# ===== NEXT.JS BUILD OUTPUT =====
+.next
+out
+
+# ===== NUXT.JS BUILD / GENERATE OUTPUT =====
+.nuxt
+dist
+
+# ===== GATSBY FILES =====
+.cache/
+public
+
+# ===== STORYBOOK BUILD OUTPUTS =====
+.out
+.storybook-out
+
+# ===== TEMPORARY FOLDERS =====
+.tmp
+.temp
+tmp/
+temp/
+
+# ===== EDITOR DIRECTORIES AND FILES =====
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.swp
+*.swo
+*~
+
+# ===== IDE =====
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# ===== OS GENERATED FILES =====
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# ===== VERCEL =====
+.vercel
+
+# ===== NETLIFY =====
+.netlify
+
+# ===== FIREBASE =====
+.firebase
+.firebaserc
+firebase-debug.log
+
+# ===== TESTING =====
+coverage/
+.nyc_output/
+test-results/
+playwright-report/
+
+# ===== LIGHTHOUSE =====
+reports/
+lighthouse-report.html
+
+# ===== BUNDLESIZE =====
+.bundlesize.json
+
+# ===== SECURITY =====
+.env.example
+*.key
+*.pem
+*.p12
+*.pfx
+
+# ===== MISC =====
+*.tgz
+*.tar.gz
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+.pnp.*
