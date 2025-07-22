@@ -1,0 +1,64 @@
+TOZSolutions Clone Raporu
+==============================
+Tarih: 2025-07-22 15:45:43
+Süre: 40.48 saniye
+Denenen: 53 repository
+Başarılı: 1
+Başarısız: 52
+
+Başarılı Repository'ler:
+  - asligibi_website-_2
+
+Başarısız Repository'ler:
+  - website
+  - portfolio
+  - blog
+  - app
+  - dashboard
+  - admin
+  - api
+  - backend
+  - frontend
+  - mobile
+  - docs
+  - landing
+  - shop
+  - ecommerce
+  - cms
+  - crm
+  - erp
+  - hr
+  - finance
+  - inventory
+  - booking
+  - reservation
+  - chat
+  - messaging
+  - social
+  - network
+  - platform
+  - service
+  - microservice
+  - auth
+  - authentication
+  - authorization
+  - payment
+  - billing
+  - subscription
+  - notification
+  - email
+  - sms
+  - analytics
+  - monitoring
+  - logging
+  - config
+  - utils
+  - tools
+  - scripts
+  - automation
+  - ci-cd
+  - devops
+  - docker
+  - kubernetes
+  - terraform
+  - ansible

@@ -5,7 +5,7 @@
  * Version: 1.0.0
  */
 
-// ===== GLOBAL VARIABLES =====
+// Configuration object
 const CONFIG = {
     animationDuration: 300,
     scrollOffset: 80,
@@ -14,10 +14,9 @@ const CONFIG = {
     phonePattern: /^[\+]?[1-9][\d]{0,15}$/
 };
 
-// ===== UTILITY FUNCTIONS =====
-const Utils = {
-    // Debounce function for performance optimization
-    debounce: function(func, wait) {
+// Utility functions
+class Utils {
+    static debounce(func, wait) {
         let timeout;
         return function executedFunction(...args) {
             const later = () => {
@@ -27,10 +26,9 @@ const Utils = {
             clearTimeout(timeout);
             timeout = setTimeout(later, wait);
         };
-    },
+    }
 
-    // Throttle function for scroll events
-    throttle: function(func, limit) {
+    static throttle(func, limit) {
         let inThrottle;
         return function() {
             const args = arguments;
@@ -40,455 +38,410 @@ const Utils = {
                 inThrottle = true;
                 setTimeout(() => inThrottle = false, limit);
             }
-        }
-    },
+        };
+    }
 
-    // Check if element is in viewport
-    isInViewport: function(element) {
-        const rect = element.getBoundingClientRect();
-        return (
-            rect.top >= 0 &&
-            rect.left >= 0 &&
-            rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
-            rect.right <= (window.innerWidth || document.documentElement.clientWidth)
-        );
-    },
+    static isValidEmail(email) {
+        return CONFIG.emailPattern.test(email);
+    }
 
-    // Smooth scroll to element
-    scrollToElement: function(element, offset = CONFIG.scrollOffset) {
-        const elementPosition = element.getBoundingClientRect().top;
-        const offsetPosition = elementPosition + window.pageYOffset - offset;
+    static isValidPhone(phone) {
+        return CONFIG.phonePattern.test(phone);
+    }
 
-        window.scrollTo({
-            top: offsetPosition,
-            behavior: 'smooth'
-        });
-    },
+    static sanitizeInput(str) {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
 
-    // Show notification
-    showNotification: function(message, type = 'info') {
+    static showNotification(message, type = 'info') {
         const notification = document.createElement('div');
         notification.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
-        notification.style.cssText = `
-            top: 20px;
-            right: 20px;
-            z-index: 9999;
-            min-width: 300px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        `;
+        notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; max-width: 300px;';
         notification.innerHTML = `
             ${message}
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         `;
-
         document.body.appendChild(notification);
-
-        // Auto remove after 5 seconds
+        
         setTimeout(() => {
             if (notification.parentNode) {
                 notification.remove();
             }
         }, 5000);
-    },
-
-    // Format phone number
-    formatPhoneNumber: function(value) {
-        const phoneNumber = value.replace(/\D/g, '');
-        const phoneNumberLength = phoneNumber.length;
-        
-        if (phoneNumberLength < 4) return phoneNumber;
-        if (phoneNumberLength < 7) {
-            return `(${phoneNumber.slice(0, 3)}) ${phoneNumber.slice(3)}`;
-        }
-        return `(${phoneNumber.slice(0, 3)}) ${phoneNumber.slice(3, 6)}-${phoneNumber.slice(6, 10)}`;
     }
-};
 
-// ===== NAVIGATION FUNCTIONALITY =====
-const Navigation = {
-    init: function() {
-        this.setupSmoothScrolling();
-        this.setupActiveNavigation();
-        this.setupMobileMenu();
-        this.setupScrollIndicator();
-    },
+    static async animateElement(element, animationClass, duration = 1000) {
+        return new Promise((resolve) => {
+            element.classList.add(animationClass);
+            setTimeout(() => {
+                element.classList.remove(animationClass);
+                resolve();
+            }, duration);
+        });
+    }
+}
 
-    setupSmoothScrolling: function() {
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    Utils.scrollToElement(target);
-                    
-                    // Close mobile menu if open
-                    const navbarCollapse = document.querySelector('.navbar-collapse');
-                    if (navbarCollapse.classList.contains('show')) {
-                        const bsCollapse = new bootstrap.Collapse(navbarCollapse);
-                        bsCollapse.hide();
+// Navigation functionality
+class Navigation {
+    constructor() {
+        this.navbar = document.querySelector('.navbar');
+        this.navLinks = document.querySelectorAll('.nav-link');
+        this.init();
+    }
+
+    init() {
+        this.handleScroll();
+        this.handleSmoothScrolling();
+        this.handleActiveSection();
+        this.handleMobileMenu();
+    }
+
+    handleScroll() {
+        const scrollHandler = Utils.throttle(() => {
+            if (window.scrollY > 50) {
+                this.navbar.classList.add('scrolled');
+            } else {
+                this.navbar.classList.remove('scrolled');
+            }
+        }, 10);
+
+        window.addEventListener('scroll', scrollHandler);
+    }
+
+    handleSmoothScrolling() {
+        this.navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                const href = link.getAttribute('href');
+                if (href.startsWith('#')) {
+                    e.preventDefault();
+                    const target = document.querySelector(href);
+                    if (target) {
+                        const offsetTop = target.offsetTop - CONFIG.scrollOffset;
+                        window.scrollTo({
+                            top: offsetTop,
+                            behavior: 'smooth'
+                        });
                     }
                 }
             });
         });
-    },
+    }
 
-    setupActiveNavigation: function() {
+    handleActiveSection() {
         const sections = document.querySelectorAll('section[id]');
-        const navLinks = document.querySelectorAll('.navbar-nav .nav-link');
-
-        const setActiveNav = Utils.throttle(() => {
-            let current = '';
+        const scrollHandler = Utils.throttle(() => {
+            const scrollPos = window.scrollY + CONFIG.scrollOffset + 100;
+            
             sections.forEach(section => {
-                const sectionTop = section.getBoundingClientRect().top;
-                if (sectionTop <= CONFIG.scrollOffset + 50) {
-                    current = section.getAttribute('id');
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.offsetHeight;
+                const sectionId = section.getAttribute('id');
+                
+                if (scrollPos >= sectionTop && scrollPos < sectionTop + sectionHeight) {
+                    this.navLinks.forEach(link => {
+                        link.classList.remove('active');
+                        if (link.getAttribute('href') === `#${sectionId}`) {
+                            link.classList.add('active');
+                        }
+                    });
                 }
             });
+        }, 50);
 
-            navLinks.forEach(link => {
-                link.classList.remove('active');
-                if (link.getAttribute('href') === `#${current}`) {
-                    link.classList.add('active');
-                }
-            });
-        }, 100);
+        window.addEventListener('scroll', scrollHandler);
+    }
 
-        window.addEventListener('scroll', setActiveNav);
-    },
-
-    setupMobileMenu: function() {
+    handleMobileMenu() {
         const navbarToggler = document.querySelector('.navbar-toggler');
         const navbarCollapse = document.querySelector('.navbar-collapse');
-
+        
         if (navbarToggler && navbarCollapse) {
-            navbarToggler.addEventListener('click', function() {
-                this.classList.toggle('active');
+            this.navLinks.forEach(link => {
+                link.addEventListener('click', () => {
+                    if (navbarCollapse.classList.contains('show')) {
+                        navbarToggler.click();
+                    }
+                });
             });
         }
-    },
-
-    setupScrollIndicator: function() {
-        const scrollIndicator = document.createElement('div');
-        scrollIndicator.className = 'scroll-indicator';
-        document.body.appendChild(scrollIndicator);
-
-        const updateScrollIndicator = Utils.throttle(() => {
-            const scrollTop = window.pageYOffset;
-            const documentHeight = document.documentElement.scrollHeight - window.innerHeight;
-            const scrollPercentage = (scrollTop / documentHeight) * 100;
-            scrollIndicator.style.width = scrollPercentage + '%';
-        }, 10);
-
-        window.addEventListener('scroll', updateScrollIndicator);
     }
-};
+}
 
-// ===== ANIMATION FUNCTIONALITY =====
-const Animations = {
-    init: function() {
-        this.setupScrollAnimations();
-        this.setupCounterAnimations();
-        this.setupParallaxEffect();
-    },
-
-    setupScrollAnimations: function() {
-        const observerOptions = {
+// Animation functionality
+class Animations {
+    constructor() {
+        this.observerOptions = {
             threshold: 0.1,
             rootMargin: '0px 0px -50px 0px'
         };
+        this.init();
+    }
 
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('animate-on-scroll');
-                }
+    init() {
+        this.setupIntersectionObserver();
+        this.handleHoverAnimations();
+        this.handleScrollAnimations();
+    }
+
+    setupIntersectionObserver() {
+        if ('IntersectionObserver' in window) {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('animate-in');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, this.observerOptions);
+
+            // Observe elements that should animate on scroll
+            const animateElements = document.querySelectorAll(
+                '.feature-card, .service-card, .contact-form, .hero-card'
+            );
+            animateElements.forEach(el => observer.observe(el));
+        }
+    }
+
+    handleHoverAnimations() {
+        const cards = document.querySelectorAll('.feature-card, .service-card');
+        cards.forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.style.transform = 'translateY(-10px) scale(1.02)';
             });
-        }, observerOptions);
-
-        // Observe elements for animation
-        document.querySelectorAll('.card, .service-card, .contact-info').forEach((el, index) => {
-            el.style.animationDelay = `${index * 0.1}s`;
-            observer.observe(el);
-        });
-    },
-
-    setupCounterAnimations: function() {
-        const counters = document.querySelectorAll('[data-counter]');
-        
-        const animateCounter = (counter) => {
-            const target = parseInt(counter.getAttribute('data-counter'));
-            const duration = 2000;
-            const increment = target / (duration / 16);
-            let current = 0;
-
-            const updateCounter = () => {
-                current += increment;
-                if (current < target) {
-                    counter.textContent = Math.floor(current);
-                    requestAnimationFrame(updateCounter);
-                } else {
-                    counter.textContent = target;
-                }
-            };
-
-            updateCounter();
-        };
-
-        const counterObserver = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    animateCounter(entry.target);
-                    counterObserver.unobserve(entry.target);
-                }
-            });
-        });
-
-        counters.forEach(counter => counterObserver.observe(counter));
-    },
-
-    setupParallaxEffect: function() {
-        const parallaxElements = document.querySelectorAll('[data-parallax]');
-        
-        const updateParallax = Utils.throttle(() => {
-            const scrolled = window.pageYOffset;
             
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = '';
+            });
+        });
+    }
+
+    handleScrollAnimations() {
+        const parallaxElements = document.querySelectorAll('.hero-section::before');
+        const scrollHandler = Utils.throttle(() => {
+            const scrolled = window.pageYOffset;
             parallaxElements.forEach(element => {
                 const rate = scrolled * -0.5;
                 element.style.transform = `translateY(${rate}px)`;
             });
-        }, 10);
+        }, 16);
 
-        if (parallaxElements.length > 0) {
-            window.addEventListener('scroll', updateParallax);
+        window.addEventListener('scroll', scrollHandler);
+    }
+}
+
+// Form functionality
+class Forms {
+    constructor() {
+        this.contactForm = document.getElementById('contactForm');
+        this.init();
+    }
+
+    init() {
+        if (this.contactForm) {
+            this.handleFormSubmission();
+            this.handleRealTimeValidation();
         }
     }
-};
 
-// ===== FORM FUNCTIONALITY =====
-const Forms = {
-    init: function() {
-        this.setupContactForm();
-        this.setupFormValidation();
-        this.setupFormEnhancements();
-    },
+    handleFormSubmission() {
+        this.contactForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(this.contactForm);
+            const data = Object.fromEntries(formData.entries());
+            
+            // Validate form data
+            if (!this.validateForm(data)) {
+                return;
+            }
 
-    setupContactForm: function() {
-        const contactForm = document.getElementById('contactForm');
-        
-        if (contactForm) {
-            contactForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                
-                const formData = new FormData(contactForm);
-                const formObject = Object.fromEntries(formData.entries());
-                
-                // Validate form
-                if (this.validateContactForm(formObject)) {
-                    await this.submitContactForm(formObject);
-                }
-            });
-        }
-    },
-
-    validateContactForm: function(data) {
-        const errors = [];
-
-        // Name validation
-        if (!data.name || data.name.trim().length < 2) {
-            errors.push('Ad soyad en az 2 karakter olmalıdır.');
-        }
-
-        // Email validation
-        if (!data.email || !CONFIG.emailPattern.test(data.email)) {
-            errors.push('Geçerli bir e-posta adresi giriniz.');
-        }
-
-        // Subject validation
-        if (!data.subject || data.subject.trim().length < 5) {
-            errors.push('Konu en az 5 karakter olmalıdır.');
-        }
-
-        // Message validation
-        if (!data.message || data.message.trim().length < 10) {
-            errors.push('Mesaj en az 10 karakter olmalıdır.');
-        }
-
-        if (errors.length > 0) {
-            Utils.showNotification(errors.join('<br>'), 'danger');
-            return false;
-        }
-
-        return true;
-    },
-
-    submitContactForm: async function(data) {
-        const submitButton = document.querySelector('#contactForm button[type="submit"]');
-        const originalText = submitButton.innerHTML;
-        
-        try {
             // Show loading state
-            submitButton.disabled = true;
-            submitButton.innerHTML = '<span class="loading"></span> Gönderiliyor...';
+            const submitBtn = this.contactForm.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Gönderiliyor...';
+            submitBtn.disabled = true;
 
-            // Simulate API call (replace with actual endpoint)
-            await new Promise(resolve => setTimeout(resolve, 2000));
-
-            // Success
-            Utils.showNotification('Mesajınız başarıyla gönderildi! En kısa sürede size dönüş yapacağız.', 'success');
-            document.getElementById('contactForm').reset();
-
-        } catch (error) {
-            console.error('Form submission error:', error);
-            Utils.showNotification('Mesaj gönderilirken bir hata oluştu. Lütfen tekrar deneyiniz.', 'danger');
-        } finally {
-            // Reset button state
-            submitButton.disabled = false;
-            submitButton.innerHTML = originalText;
-        }
-    },
-
-    setupFormValidation: function() {
-        const inputs = document.querySelectorAll('input, textarea');
-        
-        inputs.forEach(input => {
-            input.addEventListener('blur', (e) => {
-                this.validateField(e.target);
-            });
-
-            input.addEventListener('input', (e) => {
-                this.clearFieldError(e.target);
+            try {
+                // Simulate form submission (replace with actual endpoint)
+                await this.simulateFormSubmission(data);
                 
-                // Format phone number if applicable
-                if (e.target.type === 'tel') {
-                    e.target.value = Utils.formatPhoneNumber(e.target.value);
-                }
-            });
-        });
-    },
-
-    validateField: function(field) {
-        const value = field.value.trim();
-        let isValid = true;
-        let errorMessage = '';
-
-        switch (field.type) {
-            case 'email':
-                isValid = CONFIG.emailPattern.test(value);
-                errorMessage = 'Geçerli bir e-posta adresi giriniz.';
-                break;
-            case 'tel':
-                isValid = CONFIG.phonePattern.test(value.replace(/\D/g, ''));
-                errorMessage = 'Geçerli bir telefon numarası giriniz.';
-                break;
-            default:
-                if (field.hasAttribute('required')) {
-                    isValid = value.length > 0;
-                    errorMessage = 'Bu alan zorunludur.';
-                }
-        }
-
-        if (!isValid) {
-            this.showFieldError(field, errorMessage);
-        } else {
-            this.clearFieldError(field);
-        }
-
-        return isValid;
-    },
-
-    showFieldError: function(field, message) {
-        field.classList.add('is-invalid');
-        
-        let feedback = field.parentNode.querySelector('.invalid-feedback');
-        if (!feedback) {
-            feedback = document.createElement('div');
-            feedback.className = 'invalid-feedback';
-            field.parentNode.appendChild(feedback);
-        }
-        feedback.textContent = message;
-    },
-
-    clearFieldError: function(field) {
-        field.classList.remove('is-invalid');
-        const feedback = field.parentNode.querySelector('.invalid-feedback');
-        if (feedback) {
-            feedback.remove();
-        }
-    },
-
-    setupFormEnhancements: function() {
-        // Auto-resize textareas
-        document.querySelectorAll('textarea').forEach(textarea => {
-            textarea.addEventListener('input', function() {
-                this.style.height = 'auto';
-                this.style.height = this.scrollHeight + 'px';
-            });
-        });
-
-        // Add floating labels effect
-        document.querySelectorAll('.form-control').forEach(input => {
-            input.addEventListener('focus', function() {
-                this.parentNode.classList.add('focused');
-            });
-
-            input.addEventListener('blur', function() {
-                if (!this.value) {
-                    this.parentNode.classList.remove('focused');
-                }
-            });
-
-            // Initialize focused state for pre-filled inputs
-            if (input.value) {
-                input.parentNode.classList.add('focused');
+                Utils.showNotification('Mesajınız başarıyla gönderildi!', 'success');
+                this.contactForm.reset();
+                
+            } catch (error) {
+                Utils.showNotification('Mesaj gönderilemedi. Lütfen tekrar deneyin.', 'danger');
+                console.error('Form submission error:', error);
+                
+            } finally {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
             }
         });
     }
-};
 
-// ===== PERFORMANCE OPTIMIZATION =====
-const Performance = {
-    init: function() {
-        this.setupLazyLoading();
-        this.setupImageOptimization();
-        this.setupCacheManagement();
-    },
-
-    setupLazyLoading: function() {
-        const images = document.querySelectorAll('img[data-src]');
+    handleRealTimeValidation() {
+        const inputs = this.contactForm.querySelectorAll('input, textarea');
         
+        inputs.forEach(input => {
+            const debouncedValidation = Utils.debounce(() => {
+                this.validateField(input);
+            }, CONFIG.debounceDelay);
+            
+            input.addEventListener('input', debouncedValidation);
+            input.addEventListener('blur', () => this.validateField(input));
+        });
+    }
+
+    validateField(field) {
+        const value = field.value.trim();
+        const fieldName = field.name;
+        let isValid = true;
+        let message = '';
+
+        // Remove existing validation classes
+        field.classList.remove('is-valid', 'is-invalid');
+        
+        // Remove existing feedback
+        const existingFeedback = field.parentNode.querySelector('.invalid-feedback');
+        if (existingFeedback) {
+            existingFeedback.remove();
+        }
+
+        // Validate based on field type
+        switch (fieldName) {
+            case 'name':
+                if (value.length < 2) {
+                    isValid = false;
+                    message = 'Ad soyad en az 2 karakter olmalıdır.';
+                }
+                break;
+                
+            case 'email':
+                if (!Utils.isValidEmail(value)) {
+                    isValid = false;
+                    message = 'Geçerli bir e-posta adresi giriniz.';
+                }
+                break;
+                
+            case 'subject':
+                if (value.length < 5) {
+                    isValid = false;
+                    message = 'Konu en az 5 karakter olmalıdır.';
+                }
+                break;
+                
+            case 'message':
+                if (value.length < 10) {
+                    isValid = false;
+                    message = 'Mesaj en az 10 karakter olmalıdır.';
+                }
+                break;
+        }
+
+        // Apply validation styles
+        if (value && !isValid) {
+            field.classList.add('is-invalid');
+            const feedback = document.createElement('div');
+            feedback.className = 'invalid-feedback';
+            feedback.textContent = message;
+            field.parentNode.appendChild(feedback);
+        } else if (value) {
+            field.classList.add('is-valid');
+        }
+
+        return isValid;
+    }
+
+    validateForm(data) {
+        let isValid = true;
+        
+        // Validate all fields
+        Object.keys(data).forEach(key => {
+            const field = this.contactForm.querySelector(`[name="${key}"]`);
+            if (field && !this.validateField(field)) {
+                isValid = false;
+            }
+        });
+
+        // Check required fields
+        const requiredFields = ['name', 'email', 'subject', 'message'];
+        requiredFields.forEach(fieldName => {
+            if (!data[fieldName] || data[fieldName].trim() === '') {
+                isValid = false;
+                const field = this.contactForm.querySelector(`[name="${fieldName}"]`);
+                if (field) {
+                    field.classList.add('is-invalid');
+                    const feedback = document.createElement('div');
+                    feedback.className = 'invalid-feedback';
+                    feedback.textContent = 'Bu alan zorunludur.';
+                    field.parentNode.appendChild(feedback);
+                }
+            }
+        });
+
+        return isValid;
+    }
+
+    async simulateFormSubmission(data) {
+        // Simulate API call delay
+        return new Promise((resolve) => {
+            setTimeout(() => {
+                console.log('Form submitted with data:', data);
+                resolve();
+            }, 2000);
+        });
+    }
+}
+
+// Performance optimization
+class Performance {
+    constructor() {
+        this.init();
+    }
+
+    init() {
+        this.lazyLoadImages();
+        this.preloadCriticalResources();
+        this.setupServiceWorker();
+    }
+
+    lazyLoadImages() {
         if ('IntersectionObserver' in window) {
-            const imageObserver = new IntersectionObserver((entries, observer) => {
+            const imageObserver = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
                         const img = entry.target;
                         img.src = img.dataset.src;
                         img.classList.remove('lazy');
-                        observer.unobserve(img);
+                        imageObserver.unobserve(img);
                     }
                 });
             });
 
-            images.forEach(img => imageObserver.observe(img));
-        } else {
-            // Fallback for older browsers
-            images.forEach(img => {
-                img.src = img.dataset.src;
-                img.classList.remove('lazy');
+            document.querySelectorAll('img[data-src]').forEach(img => {
+                imageObserver.observe(img);
             });
         }
-    },
+    }
 
-    setupImageOptimization: function() {
-        // Add loading attribute to images
-        document.querySelectorAll('img').forEach(img => {
-            if (!img.hasAttribute('loading')) {
-                img.setAttribute('loading', 'lazy');
-            }
+    preloadCriticalResources() {
+        const criticalResources = [
+            'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css',
+            'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'
+        ];
+
+        criticalResources.forEach(resource => {
+            const link = document.createElement('link');
+            link.rel = 'preload';
+            link.as = 'style';
+            link.href = resource;
+            document.head.appendChild(link);
         });
-    },
+    }
 
-    setupCacheManagement: function() {
-        // Service worker registration for caching
+    setupServiceWorker() {
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('/sw.js')
@@ -501,145 +454,144 @@ const Performance = {
             });
         }
     }
-};
+}
 
-// ===== ACCESSIBILITY FEATURES =====
-const Accessibility = {
-    init: function() {
-        this.setupKeyboardNavigation();
-        this.setupFocusManagement();
-        this.setupARIALabels();
-    },
+// Accessibility features
+class Accessibility {
+    constructor() {
+        this.init();
+    }
 
-    setupKeyboardNavigation: function() {
-        // Skip to main content link
+    init() {
+        this.handleKeyboardNavigation();
+        this.setupAriaLabels();
+        this.handleFocusManagement();
+        this.setupReducedMotion();
+    }
+
+    handleKeyboardNavigation() {
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Tab') {
+                document.body.classList.add('keyboard-navigation');
+            }
+        });
+
+        document.addEventListener('mousedown', () => {
+            document.body.classList.remove('keyboard-navigation');
+        });
+
+        // Skip to main content
         const skipLink = document.createElement('a');
         skipLink.href = '#main';
+        skipLink.className = 'skip-link position-absolute';
         skipLink.textContent = 'Ana içeriğe geç';
-        skipLink.className = 'skip-link visually-hidden-focusable';
-        skipLink.style.cssText = `
-            position: absolute;
-            top: -40px;
-            left: 6px;
-            z-index: 9999;
-            padding: 8px 16px;
-            background: #000;
-            color: #fff;
-            text-decoration: none;
-            border-radius: 4px;
-        `;
+        skipLink.style.cssText = 'top: -40px; left: 6px; background: #000; color: #fff; padding: 8px; z-index: 9999; text-decoration: none;';
+        
         skipLink.addEventListener('focus', () => {
             skipLink.style.top = '6px';
         });
+        
         skipLink.addEventListener('blur', () => {
             skipLink.style.top = '-40px';
         });
-        document.body.insertBefore(skipLink, document.body.firstChild);
-
-        // Escape key functionality
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                // Close modals, menus, etc.
-                const openModal = document.querySelector('.modal.show');
-                if (openModal) {
-                    const bsModal = bootstrap.Modal.getInstance(openModal);
-                    bsModal.hide();
-                }
-            }
-        });
-    },
-
-    setupFocusManagement: function() {
-        // Focus trap for modals
-        const focusableElements = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
         
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Tab') {
-                const modal = document.querySelector('.modal.show');
-                if (modal) {
-                    const focusableContent = modal.querySelectorAll(focusableElements);
-                    const firstFocusable = focusableContent[0];
-                    const lastFocusable = focusableContent[focusableContent.length - 1];
+        document.body.insertBefore(skipLink, document.body.firstChild);
+    }
 
-                    if (e.shiftKey) {
-                        if (document.activeElement === firstFocusable) {
-                            lastFocusable.focus();
-                            e.preventDefault();
-                        }
-                    } else {
-                        if (document.activeElement === lastFocusable) {
-                            firstFocusable.focus();
-                            e.preventDefault();
-                        }
-                    }
-                }
-            }
-        });
-    },
-
-    setupARIALabels: function() {
+    setupAriaLabels() {
         // Add ARIA labels to interactive elements
-        document.querySelectorAll('button:not([aria-label])').forEach(button => {
-            const text = button.textContent.trim();
-            if (text) {
+        const buttons = document.querySelectorAll('button:not([aria-label])');
+        buttons.forEach(button => {
+            if (!button.getAttribute('aria-label')) {
+                const text = button.textContent.trim() || button.title || 'Button';
                 button.setAttribute('aria-label', text);
             }
         });
 
-        // Add role attributes
-        document.querySelectorAll('.card').forEach(card => {
-            card.setAttribute('role', 'article');
+        // Add ARIA labels to form fields
+        const formFields = document.querySelectorAll('input, textarea, select');
+        formFields.forEach(field => {
+            const label = document.querySelector(`label[for="${field.id}"]`);
+            if (label && !field.getAttribute('aria-label')) {
+                field.setAttribute('aria-label', label.textContent.trim());
+            }
         });
     }
-};
 
-// ===== THEME MANAGEMENT =====
-const Theme = {
-    init: function() {
-        this.setupThemeToggle();
-        this.loadSavedTheme();
-    },
+    handleFocusManagement() {
+        // Trap focus in modals
+        const modals = document.querySelectorAll('.modal');
+        modals.forEach(modal => {
+            modal.addEventListener('shown.bs.modal', () => {
+                const focusableElements = modal.querySelectorAll(
+                    'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+                );
+                if (focusableElements.length > 0) {
+                    focusableElements[0].focus();
+                }
+            });
+        });
+    }
 
-    setupThemeToggle: function() {
+    setupReducedMotion() {
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            document.documentElement.style.setProperty('--transition-base', 'none');
+            document.documentElement.style.setProperty('--transition-fast', 'none');
+        }
+    }
+}
+
+// Theme management
+class Theme {
+    constructor() {
+        this.currentTheme = localStorage.getItem('theme') || 'light';
+        this.init();
+    }
+
+    init() {
+        this.applyTheme();
+        this.createThemeToggle();
+    }
+
+    applyTheme() {
+        document.documentElement.setAttribute('data-theme', this.currentTheme);
+        
+        // Update theme color meta tag
+        const themeColorMeta = document.querySelector('meta[name="theme-color"]');
+        if (themeColorMeta) {
+            themeColorMeta.content = this.currentTheme === 'dark' ? '#212529' : '#ffffff';
+        }
+    }
+
+    toggleTheme() {
+        this.currentTheme = this.currentTheme === 'light' ? 'dark' : 'light';
+        localStorage.setItem('theme', this.currentTheme);
+        this.applyTheme();
+        
+        // Dispatch custom event
+        window.dispatchEvent(new CustomEvent('themeChanged', { 
+            detail: { theme: this.currentTheme } 
+        }));
+    }
+
+    createThemeToggle() {
         const themeToggle = document.createElement('button');
+        themeToggle.className = 'btn btn-outline-secondary theme-toggle position-fixed';
+        themeToggle.style.cssText = 'bottom: 20px; left: 20px; z-index: 9999; border-radius: 50%; width: 50px; height: 50px;';
         themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
-        themeToggle.className = 'btn btn-outline-primary position-fixed';
-        themeToggle.style.cssText = `
-            bottom: 20px;
-            left: 20px;
-            z-index: 9999;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-        `;
-        themeToggle.setAttribute('aria-label', 'Toggle dark mode');
-
+        themeToggle.setAttribute('aria-label', 'Tema değiştir');
+        
         themeToggle.addEventListener('click', () => {
             this.toggleTheme();
+            themeToggle.innerHTML = this.currentTheme === 'dark' ? 
+                '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
         });
-
-        document.body.appendChild(themeToggle);
-    },
-
-    toggleTheme: function() {
-        const currentTheme = document.body.getAttribute('data-theme');
-        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
         
-        document.body.setAttribute('data-theme', newTheme);
-        localStorage.setItem('theme', newTheme);
-
-        const themeToggle = document.querySelector('button[aria-label="Toggle dark mode"]');
-        const icon = themeToggle.querySelector('i');
-        icon.className = newTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
-    },
-
-    loadSavedTheme: function() {
-        const savedTheme = localStorage.getItem('theme') || 'light';
-        document.body.setAttribute('data-theme', savedTheme);
+        document.body.appendChild(themeToggle);
     }
-};
+}
 
-// ===== MAIN INITIALIZATION =====
+// Main application class
 class WebsiteApp {
     constructor() {
         this.init();
@@ -648,124 +600,33 @@ class WebsiteApp {
     init() {
         // Wait for DOM to be fully loaded
         if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', () => this.initializeModules());
+            document.addEventListener('DOMContentLoaded', () => this.initializeComponents());
         } else {
-            this.initializeModules();
+            this.initializeComponents();
         }
     }
 
-    initializeModules() {
+    initializeComponents() {
         try {
-            Navigation.init();
-            Animations.init();
-            Forms.init();
-            Performance.init();
-            Accessibility.init();
-            Theme.init();
+            // Initialize all components
+            this.navigation = new Navigation();
+            this.animations = new Animations();
+            this.forms = new Forms();
+            this.performance = new Performance();
+            this.accessibility = new Accessibility();
+            this.theme = new Theme();
 
-            // Custom initialization
-            this.setupCustomFeatures();
+            // Add loading complete class
+            document.body.classList.add('loaded');
             
-            console.log('Website initialized successfully');
+            // Log successful initialization
+            console.log('🚀 Aslı Gibi Website initialized successfully!');
+            
         } catch (error) {
-            console.error('Error initializing website:', error);
+            console.error('❌ Error initializing website:', error);
         }
     }
-
-    setupCustomFeatures() {
-        // Add any custom features here
-        this.setupBackToTop();
-        this.setupTypingEffect();
-        this.setupTooltips();
-    }
-
-    setupBackToTop() {
-        const backToTop = document.createElement('button');
-        backToTop.innerHTML = '<i class="fas fa-arrow-up"></i>';
-        backToTop.className = 'btn btn-primary position-fixed';
-        backToTop.style.cssText = `
-            bottom: 20px;
-            right: 20px;
-            z-index: 9999;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s ease;
-        `;
-        backToTop.setAttribute('aria-label', 'Back to top');
-
-        const toggleBackToTop = Utils.throttle(() => {
-            if (window.pageYOffset > 300) {
-                backToTop.style.opacity = '1';
-                backToTop.style.visibility = 'visible';
-            } else {
-                backToTop.style.opacity = '0';
-                backToTop.style.visibility = 'hidden';
-            }
-        }, 100);
-
-        backToTop.addEventListener('click', () => {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        });
-
-        window.addEventListener('scroll', toggleBackToTop);
-        document.body.appendChild(backToTop);
-    }
-
-    setupTypingEffect() {
-        const typingElements = document.querySelectorAll('[data-typing]');
-        
-        typingElements.forEach(element => {
-            const text = element.textContent;
-            const speed = parseInt(element.dataset.typing) || 100;
-            
-            element.textContent = '';
-            let i = 0;
-            
-            const typeWriter = () => {
-                if (i < text.length) {
-                    element.textContent += text.charAt(i);
-                    i++;
-                    setTimeout(typeWriter, speed);
-                }
-            };
-            
-            // Start typing when element is visible
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        typeWriter();
-                        observer.unobserve(entry.target);
-                    }
-                });
-            });
-            
-            observer.observe(element);
-        });
-    }
-
-    setupTooltips() {
-        // Initialize Bootstrap tooltips
-        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-        tooltipTriggerList.map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
-    }
 }
 
-// ===== START APPLICATION =====
+// Initialize the application
 const app = new WebsiteApp();
-
-// ===== EXPORT FOR MODULE USAGE =====
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = {
-        WebsiteApp,
-        Utils,
-        Navigation,
-        Animations,
-        Forms,
-        Performance,
-        Accessibility,
-        Theme
-    };
-}

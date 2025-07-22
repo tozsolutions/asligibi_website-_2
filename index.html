@@ -9,10 +9,13 @@
     <title>Aslı Gibi - Ana Sayfa</title>
     <link rel="stylesheet" href="styles/main.css">
     <link rel="icon" href="assets/favicon.ico" type="image/x-icon">
+    
     <!-- Modern CSS Framework - Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
@@ -50,86 +53,75 @@
         <div class="container">
             <div class="row align-items-center min-vh-100">
                 <div class="col-lg-6">
-                    <h1 class="display-4 fw-bold text-dark mb-4">
-                        Hoş Geldiniz <span class="text-primary">Aslı Gibi</span>'ye
-                    </h1>
-                    <p class="lead text-muted mb-4">
-                        Modern, güvenilir ve kullanıcı dostu çözümlerle hayallerinizi gerçeğe dönüştürüyoruz.
-                    </p>
-                    <div class="d-flex gap-3">
-                        <a href="#services" class="btn btn-primary btn-lg px-4">
-                            <i class="fas fa-rocket me-2"></i>Hizmetlerimiz
-                        </a>
-                        <a href="#contact" class="btn btn-outline-primary btn-lg px-4">
-                            <i class="fas fa-phone me-2"></i>İletişim
-                        </a>
+                    <div class="hero-content">
+                        <h1 class="hero-title">Aslı Gibi</h1>
+                        <p class="hero-subtitle">Modern ve profesyonel çözümler</p>
+                        <p class="hero-description">
+                            Son teknoloji ile geliştirilen, kullanıcı dostu ve etkileyici web deneyimi.
+                        </p>
+                        <div class="hero-buttons">
+                            <a href="#about" class="btn btn-primary btn-lg me-3">
+                                <i class="fas fa-info-circle me-2"></i>Keşfet
+                            </a>
+                            <a href="#contact" class="btn btn-outline-primary btn-lg">
+                                <i class="fas fa-envelope me-2"></i>İletişim
+                            </a>
+                        </div>
                     </div>
                 </div>
                 <div class="col-lg-6">
-                    <div class="hero-image text-center">
-                        <div class="bg-primary bg-gradient rounded-circle d-inline-flex align-items-center justify-content-center" 
-                             style="width: 300px; height: 300px;">
-                            <i class="fas fa-star text-white" style="font-size: 120px;"></i>
+                    <div class="hero-image">
+                        <div class="hero-card">
+                            <i class="fas fa-rocket hero-icon"></i>
+                            <h3>İnovatif Çözümler</h3>
+                            <p>Modern teknoloji ile güçlendirilmiş</p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+        <div class="hero-scroll">
+            <a href="#about" class="scroll-down">
+                <i class="fas fa-chevron-down"></i>
+            </a>
+        </div>
     </section>
 
     <!-- About Section -->
-    <section id="about" class="py-5 bg-light">
+    <section id="about" class="section-padding">
         <div class="container">
             <div class="row">
-                <div class="col-lg-8 mx-auto text-center">
-                    <h2 class="display-5 fw-bold mb-4">Hakkımızda</h2>
-                    <p class="lead text-muted mb-5">
-                        TOZSolutions olarak, modern teknolojiler kullanarak kaliteli ve sürdürülebilir 
-                        çözümler geliştiriyoruz. Müşteri memnuniyeti bizim en büyük önceliğimizdir.
-                    </p>
+                <div class="col-lg-12 text-center">
+                    <h2 class="section-title">Hakkımızda</h2>
+                    <p class="section-subtitle">Aslı Gibi farkını keşfedin</p>
                 </div>
             </div>
-            <div class="row g-4">
-                <div class="col-md-4">
-                    <div class="card h-100 border-0 shadow-sm">
-                        <div class="card-body text-center p-4">
-                            <div class="bg-primary bg-gradient rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
-                                 style="width: 80px; height: 80px;">
-                                <i class="fas fa-lightbulb text-white fs-3"></i>
-                            </div>
-                            <h5 class="card-title">İnovatif Çözümler</h5>
-                            <p class="card-text text-muted">
-                                En son teknolojileri kullanarak yaratıcı ve etkili çözümler sunuyoruz.
-                            </p>
+            <div class="row mt-5">
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-palette"></i>
                         </div>
+                        <h4>Modern Tasarım</h4>
+                        <p>Çağdaş ve kullanıcı dostu arayüz tasarımları ile etkileyici görsel deneyim.</p>
                     </div>
                 </div>
-                <div class="col-md-4">
-                    <div class="card h-100 border-0 shadow-sm">
-                        <div class="card-body text-center p-4">
-                            <div class="bg-success bg-gradient rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
-                                 style="width: 80px; height: 80px;">
-                                <i class="fas fa-users text-white fs-3"></i>
-                            </div>
-                            <h5 class="card-title">Deneyimli Ekip</h5>
-                            <p class="card-text text-muted">
-                                Alanında uzman, deneyimli ve tutkulu bir ekiple çalışıyoruz.
-                            </p>
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-mobile-alt"></i>
                         </div>
+                        <h4>Mobil Uyumlu</h4>
+                        <p>Tüm cihazlarda mükemmel görünüm ve performans için responsive tasarım.</p>
                     </div>
                 </div>
-                <div class="col-md-4">
-                    <div class="card h-100 border-0 shadow-sm">
-                        <div class="card-body text-center p-4">
-                            <div class="bg-info bg-gradient rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
-                                 style="width: 80px; height: 80px;">
-                                <i class="fas fa-clock text-white fs-3"></i>
-                            </div>
-                            <h5 class="card-title">7/24 Destek</h5>
-                            <p class="card-text text-muted">
-                                Kesintisiz destek hizmeti ile her zaman yanınızdayız.
-                            </p>
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-bolt"></i>
                         </div>
+                        <h4>Hızlı Performans</h4>
+                        <p>Optimize edilmiş kod yapısı ile yüksek performans ve hızlı yükleme.</p>
                     </div>
                 </div>
             </div>
@@ -137,62 +129,40 @@
     </section>
 
     <!-- Services Section -->
-    <section id="services" class="py-5">
+    <section id="services" class="section-padding bg-light">
         <div class="container">
             <div class="row">
-                <div class="col-lg-8 mx-auto text-center mb-5">
-                    <h2 class="display-5 fw-bold mb-4">Hizmetlerimiz</h2>
-                    <p class="lead text-muted">
-                        Geniş hizmet yelpazemizle tüm ihtiyaçlarınıza cevap veriyoruz.
-                    </p>
+                <div class="col-lg-12 text-center">
+                    <h2 class="section-title">Hizmetlerimiz</h2>
+                    <p class="section-subtitle">Size en uygun çözümü sunuyoruz</p>
                 </div>
             </div>
-            <div class="row g-4">
-                <div class="col-lg-4 col-md-6">
-                    <div class="service-card p-4 h-100">
-                        <div class="service-icon mb-3">
-                            <i class="fas fa-code text-primary fs-1"></i>
+            <div class="row mt-5">
+                <div class="col-lg-6 col-md-6 mb-4">
+                    <div class="service-card">
+                        <div class="service-header">
+                            <i class="fas fa-code service-icon"></i>
+                            <h4>Web Geliştirme</h4>
                         </div>
-                        <h5 class="fw-bold mb-3">Web Geliştirme</h5>
-                        <p class="text-muted mb-3">
-                            Modern, responsive ve SEO uyumlu web siteleri geliştiriyoruz.
-                        </p>
-                        <ul class="list-unstyled text-muted">
+                        <p>Modern web teknolojileri ile profesyonel web siteleri ve uygulamalar.</p>
+                        <ul class="service-features">
                             <li><i class="fas fa-check text-success me-2"></i>Responsive Tasarım</li>
                             <li><i class="fas fa-check text-success me-2"></i>SEO Optimizasyonu</li>
                             <li><i class="fas fa-check text-success me-2"></i>Hızlı Yükleme</li>
                         </ul>
                     </div>
                 </div>
-                <div class="col-lg-4 col-md-6">
-                    <div class="service-card p-4 h-100">
-                        <div class="service-icon mb-3">
-                            <i class="fas fa-mobile-alt text-primary fs-1"></i>
+                <div class="col-lg-6 col-md-6 mb-4">
+                    <div class="service-card">
+                        <div class="service-header">
+                            <i class="fas fa-paint-brush service-icon"></i>
+                            <h4>UI/UX Tasarım</h4>
                         </div>
-                        <h5 class="fw-bold mb-3">Mobil Uygulamalar</h5>
-                        <p class="text-muted mb-3">
-                            iOS ve Android platformları için native ve hybrid uygulamalar.
-                        </p>
-                        <ul class="list-unstyled text-muted">
-                            <li><i class="fas fa-check text-success me-2"></i>Native Geliştirme</li>
-                            <li><i class="fas fa-check text-success me-2"></i>Cross-Platform</li>
-                            <li><i class="fas fa-check text-success me-2"></i>App Store Yayınlama</li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="col-lg-4 col-md-6">
-                    <div class="service-card p-4 h-100">
-                        <div class="service-icon mb-3">
-                            <i class="fas fa-cloud text-primary fs-1"></i>
-                        </div>
-                        <h5 class="fw-bold mb-3">Cloud Çözümleri</h5>
-                        <p class="text-muted mb-3">
-                            Ölçeklenebilir ve güvenli bulut altyapısı çözümleri sunuyoruz.
-                        </p>
-                        <ul class="list-unstyled text-muted">
-                            <li><i class="fas fa-check text-success me-2"></i>AWS/Azure/GCP</li>
-                            <li><i class="fas fa-check text-success me-2"></i>DevOps Automation</li>
-                            <li><i class="fas fa-check text-success me-2"></i>Monitoring & Security</li>
+                        <p>Kullanıcı deneyimini ön planda tutan yaratıcı ve işlevsel tasarımlar.</p>
+                        <ul class="service-features">
+                            <li><i class="fas fa-check text-success me-2"></i>Kullanıcı Odaklı</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Modern Arayüz</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Erişilebilir Tasarım</li>
                         </ul>
                     </div>
                 </div>
@@ -201,106 +171,74 @@
     </section>
 
     <!-- Contact Section -->
-    <section id="contact" class="py-5 bg-light">
+    <section id="contact" class="section-padding">
         <div class="container">
             <div class="row">
-                <div class="col-lg-8 mx-auto text-center mb-5">
-                    <h2 class="display-5 fw-bold mb-4">İletişim</h2>
-                    <p class="lead text-muted">
-                        Projeleriniz hakkında konuşmak için bizimle iletişime geçin.
-                    </p>
-                </div>
-            </div>
-            <div class="row g-4">
-                <div class="col-lg-8 mx-auto">
-                    <div class="card border-0 shadow-sm">
-                        <div class="card-body p-5">
-                            <form id="contactForm">
-                                <div class="row g-3">
-                                    <div class="col-md-6">
-                                        <label for="name" class="form-label">Ad Soyad</label>
-                                        <input type="text" class="form-control" id="name" required>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label for="email" class="form-label">E-posta</label>
-                                        <input type="email" class="form-control" id="email" required>
-                                    </div>
-                                    <div class="col-12">
-                                        <label for="subject" class="form-label">Konu</label>
-                                        <input type="text" class="form-control" id="subject" required>
-                                    </div>
-                                    <div class="col-12">
-                                        <label for="message" class="form-label">Mesaj</label>
-                                        <textarea class="form-control" id="message" rows="5" required></textarea>
-                                    </div>
-                                    <div class="col-12">
-                                        <button type="submit" class="btn btn-primary btn-lg px-4">
-                                            <i class="fas fa-paper-plane me-2"></i>Mesaj Gönder
-                                        </button>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
+                <div class="col-lg-12 text-center">
+                    <h2 class="section-title">İletişim</h2>
+                    <p class="section-subtitle">Bizimle iletişime geçin</p>
                 </div>
             </div>
             <div class="row mt-5">
-                <div class="col-md-4 text-center">
-                    <div class="contact-info">
-                        <div class="bg-primary bg-gradient rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
-                             style="width: 60px; height: 60px;">
-                            <i class="fas fa-phone text-white"></i>
+                <div class="col-lg-8 mx-auto">
+                    <form id="contactForm" class="contact-form">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="name" class="form-label">Ad Soyad</label>
+                                <input type="text" class="form-control" id="name" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="email" class="form-label">E-posta</label>
+                                <input type="email" class="form-control" id="email" required>
+                            </div>
                         </div>
-                        <h6 class="fw-bold">Telefon</h6>
-                        <p class="text-muted">+90 (555) 123-4567</p>
-                    </div>
-                </div>
-                <div class="col-md-4 text-center">
-                    <div class="contact-info">
-                        <div class="bg-success bg-gradient rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
-                             style="width: 60px; height: 60px;">
-                            <i class="fas fa-envelope text-white"></i>
+                        <div class="mb-3">
+                            <label for="subject" class="form-label">Konu</label>
+                            <input type="text" class="form-control" id="subject" required>
                         </div>
-                        <h6 class="fw-bold">E-posta</h6>
-                        <p class="text-muted">info@asligibi.com</p>
-                    </div>
-                </div>
-                <div class="col-md-4 text-center">
-                    <div class="contact-info">
-                        <div class="bg-info bg-gradient rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
-                             style="width: 60px; height: 60px;">
-                            <i class="fas fa-map-marker-alt text-white"></i>
+                        <div class="mb-3">
+                            <label for="message" class="form-label">Mesaj</label>
+                            <textarea class="form-control" id="message" rows="5" required></textarea>
                         </div>
-                        <h6 class="fw-bold">Adres</h6>
-                        <p class="text-muted">İstanbul, Türkiye</p>
-                    </div>
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-paper-plane me-2"></i>Mesaj Gönder
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- Footer -->
-    <footer class="bg-dark text-white py-4">
+    <footer class="footer bg-dark text-white">
         <div class="container">
-            <div class="row align-items-center">
-                <div class="col-md-6">
-                    <p class="mb-0">&copy; 2025 Aslı Gibi - TOZSolutions. Tüm hakları saklıdır.</p>
+            <div class="row">
+                <div class="col-lg-6">
+                    <h5>Aslı Gibi</h5>
+                    <p>Modern ve profesyonel web çözümleri</p>
                 </div>
-                <div class="col-md-6 text-md-end">
+                <div class="col-lg-6 text-lg-end">
                     <div class="social-links">
-                        <a href="#" class="text-white me-3"><i class="fab fa-facebook-f"></i></a>
-                        <a href="#" class="text-white me-3"><i class="fab fa-twitter"></i></a>
-                        <a href="#" class="text-white me-3"><i class="fab fa-linkedin-in"></i></a>
-                        <a href="#" class="text-white"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-facebook"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-linkedin"></i></a>
                     </div>
+                </div>
+            </div>
+            <hr class="my-4">
+            <div class="row">
+                <div class="col-lg-12 text-center">
+                    <p>&copy; 2024 Aslı Gibi. Tüm hakları saklıdır. TOZSolutions tarafından geliştirilmiştir.</p>
                 </div>
             </div>
         </div>
     </footer>
 
-    <!-- Bootstrap JS -->
+    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Custom JS -->
     <script src="scripts/main.js"></script>
 </body>
 </html>
