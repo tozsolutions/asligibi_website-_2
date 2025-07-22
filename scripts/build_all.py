@@ -5,27 +5,9 @@ Builds all repositories from tozsolutions organization with proper configuration
 """
 
 import os
-import sys
 import subprocess
-import json
-import shutil
 import time
-from pathlib import Path
-import argparse
-import logging
-import concurrent.futures
-from typing import List, Dict, Optional
-
-# Setup logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler('build_all.log'),
-        logging.StreamHandler(sys.stdout)
-    ]
-)
-logger = logging.getLogger(__name__)
+import sys
 
 class TOZSolutionsBuilder:
     def __init__(self, base_dir="./tozsolutions_repos", parallel=True, max_workers=4):
