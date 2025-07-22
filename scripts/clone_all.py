@@ -51,21 +51,40 @@ class TOZSolutionsCloner:
         if self.github_token:
             headers['Authorization'] = f'token {self.github_token}'
         
+        all_repos = []
+        page = 1
+        
         try:
-            response = requests.get(url, headers=headers, params={'per_page': 100})
+            while True:
+                response = requests.get(url, headers=headers, params={'per_page': 100, 'page': page})
+                
+                if response.status_code == 200:
+                    repos_page = response.json()
+                    if not repos_page:  # No more repos
+                        break
+                    all_repos.extend(repos_page)
+                    logger.info(f"📄 Page {page}: Found {len(repos_page)} repositories")
+                    page += 1
+                elif response.status_code == 404:
+                    logger.warning(f"⚠️  Organization {self.org_name} not found or private")
+                    # Try to get known repositories
+                    self.get_known_repositories()
+                    return True
+                else:
+                    logger.error(f"❌ Failed to fetch repositories: {response.status_code} - {response.text}")
+                    if page == 1:  # If first page fails, try known repos
+                        self.get_known_repositories()
+                        return True
+                    break
             
-            if response.status_code == 200:
-                self.repos = response.json()
-                logger.info(f"✅ Found {len(self.repos)} repositories in {self.org_name}")
-                return True
-            elif response.status_code == 404:
-                logger.warning(f"⚠️  Organization {self.org_name} not found or private")
-                # Try to get known repositories
-                self.get_known_repositories()
-                return True
-            else:
-                logger.error(f"❌ Failed to fetch repositories: {response.status_code}")
-                return False
+            self.repos = all_repos
+            logger.info(f"✅ Found total {len(self.repos)} repositories in {self.org_name}")
+            
+            # Log repository names for debugging
+            repo_names = [repo['name'] for repo in self.repos]
+            logger.info(f"📋 Repository names: {', '.join(repo_names[:10])}{'...' if len(repo_names) > 10 else ''}")
+            
+            return True
                 
         except Exception as e:
             logger.error(f"❌ Error fetching repositories: {e}")
@@ -91,8 +110,19 @@ class TOZSolutionsCloner:
     def clone_repository(self, repo):
         """Clone a single repository"""
         repo_name = repo['name']
-        repo_url = repo['clone_url']
+        repo_url = repo.get('clone_url', repo.get('git_url', ''))
+        ssh_url = repo.get('ssh_url', '')
+        html_url = repo.get('html_url', '')
         repo_path = self.base_dir / repo_name
+        
+        # Try different URL formats if one fails
+        urls_to_try = [
+            repo_url,
+            f"https://github.com/{self.org_name}/{repo_name}.git",
+            ssh_url,
+            html_url + ".git" if html_url else ""
+        ]
+        urls_to_try = [url for url in urls_to_try if url]  # Remove empty URLs
         
         try:
             if repo_path.exists():
@@ -101,33 +131,72 @@ class TOZSolutionsCloner:
                     ['git', 'pull'], 
                     cwd=repo_path, 
                     capture_output=True, 
-                    text=True
+                    text=True,
+                    timeout=300  # 5 minutes timeout
                 )
                 if result.returncode == 0:
                     logger.info(f"✅ {repo_name} updated successfully")
+                    self.successful_repos.append(repo_name)
+                    return True
                 else:
                     logger.warning(f"⚠️  {repo_name} pull failed: {result.stderr}")
-            else:
-                logger.info(f"🔄 Cloning {repo_name}...")
-                result = subprocess.run(
-                    ['git', 'clone', repo_url, str(repo_path)],
-                    capture_output=True,
-                    text=True
-                )
-                
-                if result.returncode == 0:
-                    logger.info(f"✅ {repo_name} cloned successfully")
-                else:
-                    logger.error(f"❌ Failed to clone {repo_name}: {result.stderr}")
-                    self.failed_repos.append(repo_name)
-                    return False
+                    # Continue to try cloning fresh
+                    import shutil
+                    shutil.rmtree(repo_path)
             
-            self.successful_repos.append(repo_name)
-            return True
+            # Try cloning with different URLs
+            for i, url in enumerate(urls_to_try):
+                logger.info(f"🔄 Cloning {repo_name} (attempt {i+1}/{len(urls_to_try)})...")
+                logger.info(f"   URL: {url}")
+                
+                try:
+                    result = subprocess.run(
+                        ['git', 'clone', url, str(repo_path)],
+                        capture_output=True,
+                        text=True,
+                        timeout=600  # 10 minutes timeout
+                    )
+                    
+                    if result.returncode == 0:
+                        logger.info(f"✅ {repo_name} cloned successfully")
+                        self.successful_repos.append(repo_name)
+                        return True
+                    else:
+                        logger.warning(f"⚠️  Attempt {i+1} failed for {repo_name}: {result.stderr}")
+                        if repo_path.exists():
+                            import shutil
+                            shutil.rmtree(repo_path)  # Clean up partial clone
+                        
+                except subprocess.TimeoutExpired:
+                    logger.error(f"⏰ Clone timeout for {repo_name} with URL: {url}")
+                    if repo_path.exists():
+                        import shutil
+                        shutil.rmtree(repo_path)
+                    continue
+                except Exception as e:
+                    logger.error(f"❌ Clone error for {repo_name}: {e}")
+                    if repo_path.exists():
+                        import shutil
+                        shutil.rmtree(repo_path)
+                    continue
+            
+            # If all attempts failed
+            error_msg = f"All clone attempts failed for {repo_name}"
+            logger.error(f"❌ {error_msg}")
+            self.failed_repos.append({
+                'name': repo_name,
+                'reason': 'All clone attempts failed',
+                'urls_tried': urls_to_try
+            })
+            return False
             
         except Exception as e:
-            logger.error(f"❌ Error cloning {repo_name}: {e}")
-            self.failed_repos.append(repo_name)
+            logger.error(f"❌ Unexpected error cloning {repo_name}: {e}")
+            self.failed_repos.append({
+                'name': repo_name,
+                'reason': f'Unexpected error: {str(e)}',
+                'urls_tried': urls_to_try
+            })
             return False
     
     def setup_deployment_config(self, repo_name):
